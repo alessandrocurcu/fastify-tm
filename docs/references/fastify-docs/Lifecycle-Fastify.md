@@ -1,0 +1,61 @@
+This schema shows the internal lifecycle of Fastify.
+
+The right branch of each section shows the next phase of the lifecycle. The left branch shows the corresponding error code generated if the parent throws an error. All errors are automatically handled by Fastify.
+
+```
+Incoming Request
+  │
+  └─▶ Routing
+        │
+        └─▶ Instance Logger
+             │
+   4**/5** ◀─┴─▶ onRequest Hook
+                  │
+        4**/5** ◀─┴─▶ preParsing Hook
+                        │
+              4**/5** ◀─┴─▶ Parsing
+                             │
+                   4**/5** ◀─┴─▶ preValidation Hook
+                                  │
+                            400 ◀─┴─▶ Validation
+                                        │
+                              4**/5** ◀─┴─▶ preHandler Hook
+                                              │
+                                    4**/5** ◀─┴─▶ User Handler
+                                                    │
+                                                    └─▶ Reply
+                                                          │
+                                                4**/5** ◀─┴─▶ preSerialization Hook
+                                                                │
+                                                                └─▶ onSend Hook
+                                                                      │
+                                                            4**/5** ◀─┴─▶ Outgoing Response
+                                                                            │
+                                                                            └─▶ onResponse Hook
+```
+
+When `handlerTimeout` is configured, a timer starts after routing. If the response is not sent within the allowed time, `request.signal` is aborted and a 503 error is sent. The timer is cleared when the response finishes or when `reply.hijack()` is called. See [`handlerTimeout`](./Server-Fastify.md#factory-handler-timeout).
+
+If `reply.raw` is used to send a response, `onResponse` hooks will still be executed.
+
+If the reply was hijacked, all subsequent steps are skipped. Otherwise, when submitted, the data flow is as follows:
+
+```
+                        ★ schema validation Error
+                                    │
+                                    └─▶ schemaErrorFormatter
+                                               │
+                          reply sent ◀── JSON ─┴─ Error instance
+                                                      │
+                                                      │         ★ throw an Error
+                     ★ send or return                 │                 │
+                            │                         │                 │
+                            │                         ▼                 │
+       reply sent ◀── JSON ─┴─ Error instance ──▶ onError Hook ◀───────┘
+                                                      │
+                                 reply sent ◀── JSON ─┴─ Error instance ──▶ setErrorHandler
+                                                                                │
+                                                                                └─▶ reply sent
+```
+
+When [`fastify.close()`](./Server-Fastify.md#close) is called, the server goes through a graceful shutdown sequence involving [`preClose`](./Hooks-Fastify.md#pre-close) hooks, connection draining, and [`onClose`](./Hooks-Fastify.md#on-close) hooks. See the [`close`](./Server-Fastify.md#close) method documentation for the full step-by-step lifecycle.

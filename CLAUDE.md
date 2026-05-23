@@ -1,0 +1,3 @@
+- Use sempre pnpm
+- For TypeScript conventions see docs/typescript.md
+- Se stai implementando un piano, alla fine di ogni task esegui `pnpm lint:fix`
