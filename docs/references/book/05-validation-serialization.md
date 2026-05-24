@@ -6,6 +6,76 @@
 
 ---
 
+## Perché servono
+
+### Il problema: il client è untrusted
+
+Un server HTTP riceve dati da chiunque. Senza controlli, il codice lavora su input arbitrario:
+
+```ts
+// ❌ senza validazione
+app.post('/users', async (request) => {
+  const { name, age } = request.body   // tipi: unknown
+  await db.insert({ name, age })       // age potrebbe essere "DROP TABLE users"
+})
+```
+
+I rischi concreti:
+- **Tipo sbagliato** — `age` arriva come stringa `"ventidue"`, il DB riceve un valore inatteso
+- **Campi mancanti** — `name` è `undefined`, query fallisce, stack trace esposto al client
+- **Campi extra** — il client manda `{ name, age, isAdmin: true }`, finisce tutto nel DB
+- **Injection** — dati non sanitizzati usati in query, template o comandi di sistema
+
+La validazione è il **confine di fiducia** (trust boundary): tutto ciò che arriva dall'esterno è da considerarsi ostile finché non è stato verificato.
+
+### Due meccanismi distinti
+
+Fastify separa deliberatamente l'ingresso dall'uscita perché i problemi da risolvere sono diversi:
+
+**Validazione (ingresso)** — funziona come un gate keeper: approva o rifiuta la richiesta prima che il codice la tocchi. Se l'input non rispetta lo schema, Fastify risponde `400` senza eseguire il handler. Il codice riceve dati già verificati.
+
+**Serializzazione (uscita)** — funziona come un filtro: trasforma l'output del handler nella risposta HTTP. I campi non dichiarati nello schema `response` vengono rimossi. Questo non è solo performance — è sicurezza.
+
+```ts
+// il handler restituisce tutto il record DB
+async function getUser() {
+  return db.findOne({ id: 1 })
+  // → { id: 1, name: 'Alice', passwordHash: '...', internalRole: 'superadmin' }
+}
+
+// lo schema response filtra l'output prima che arrivi al client
+schema: {
+  response: {
+    200: z.object({ id: z.number(), name: z.string() })
+    // passwordHash e internalRole non sono qui → non arrivano mai al client
+  }
+}
+```
+
+Senza schema `response`, Fastify usa `JSON.stringify` su tutto — inclusi i campi che non dovrebbero uscire.
+
+### Il doppio vantaggio della serializzazione
+
+Oltre alla sicurezza, la serializzazione con schema offre un vantaggio di performance: Fastify usa `fast-json-stringify` invece di `JSON.stringify`. Poiché lo schema descrive esattamente la struttura dell'oggetto, la libreria può generare codice di serializzazione ottimizzato, **2–3× più veloce** di `JSON.stringify` su oggetti complessi.
+
+In pratica, definire uno schema `response` è l'unica ottimizzazione di serializzazione con zero costi di sviluppo — basta scriverlo.
+
+### Fail-fast e messaggi d'errore utili
+
+Un altro motivo per cui la validazione è preferibile al controllo manuale nel handler: il messaggio di errore.
+
+```ts
+// ❌ controllo manuale — generico, difficile da debuggare
+if (!body.name) throw new Error('invalid input')
+
+// ✅ Zod — specifico, localizzato, con path
+// → { "message": "body/name: String must contain at least 1 character(s)" }
+```
+
+Il framework sa esattamente quale campo ha fallito, quale vincolo non è stato rispettato e in quale parte della richiesta (body, params, query, headers). Il client riceve un errore `400` strutturato senza che il server abbia eseguito nemmeno una riga di logica.
+
+---
+
 ## Panoramica
 
 ```
@@ -110,7 +180,9 @@ app.post(
 
 ### Coercizione dei tipi
 
-I path param e la querystring arrivano come stringhe. Usa `z.coerce` per convertirli:
+Path param e querystring arrivano **sempre come stringhe** — è il protocollo HTTP che li trasporta così. `/users/42` porta la stringa `"42"`, non il numero `42`. Il body JSON invece arriva già parsato, quindi `z.coerce` non serve per il body.
+
+Per convertire e validare params e querystring usa `z.coerce`:
 
 ```ts
 params: z.object({
@@ -118,6 +190,22 @@ params: z.object({
   slug: z.string()
 })
 ```
+
+**Cosa succede passo per passo** per `GET /users/42`:
+
+1. Fastify estrae `{ id: "42" }` dall'URL (stringa)
+2. `z.coerce.number()` converte → `{ id: 42 }` (number)
+3. `.pipe(z.int().positive())` verifica che sia intero positivo → ✅
+4. Il handler riceve `{ id: 42 }` già tipizzato come `number`
+
+Se la validazione fallisce, Fastify risponde `400` senza eseguire il handler:
+
+| URL | Valore raw | Risultato |
+|---|---|---|
+| `/users/42` | `"42"` | ✅ `42` |
+| `/users/abc` | `"abc"` | ❌ 400 — coercizione fallisce |
+| `/users/-5` | `"-5"` | ❌ 400 — non è positivo |
+| `/users/3.14` | `"3.14"` | ❌ 400 — non è intero |
 
 > **`z.int()` vs `z.number()`** — In Zod v4 sono tipi distinti: `z.number()` accetta qualsiasi numero finito (inclusi i float); `z.int()` restringe ai safe integer. `.int()` non è un metodo su `z.number()`. Per coercere una stringa a intero usa `.pipe(z.int())` dopo `z.coerce.number()`.
 
@@ -264,6 +352,50 @@ app.get('/me', {
 ```
 
 Le chiavi del `response` object sono HTTP status code (`200`, `404`) o pattern stringa (`'2xx'`, `'5xx'`).
+
+### Response schema vs DTO
+
+Lo scopo del response schema è lo stesso di un DTO (Data Transfer Object): definire la forma dei dati che attraversano il confine API e impedire che campi interni (`passwordHash`, `internalRole`) arrivino al client.
+
+Non è però la stessa cosa tecnicamente. In un framework come NestJS il DTO è un oggetto che istanzi esplicitamente:
+
+```ts
+// NestJS — mapping esplicito, nuovo oggetto allocato
+return new UserResponseDto(user)
+```
+
+In Fastify il response schema è una dichiarazione: non istanzi nulla, Fastify usa lo schema per filtrare l'oggetto esistente durante la serializzazione con `fast-json-stringify`.
+
+| | DTO classico | Response schema Fastify |
+|---|---|---|
+| Crei un nuovo oggetto | ✅ | ❌ — filtra quello esistente |
+| Mapping esplicito | ✅ | ❌ — implicito nella serializzazione |
+| Stripping dei campi extra | manuale | automatico |
+| Performance | allocazione extra | usa `fast-json-stringify` |
+
+Usare "DTO" per comunicare l'intento al team è un'approssimazione accettabile; il termine preciso nel contesto Fastify/OpenAPI è **response schema**.
+
+### Risultati dal DB: `as` cast vs `parse()`
+
+Quando leggi dati dal database e il tipo restituito è `unknown`, il pattern corretto è il cast TypeScript, non `Schema.parse()`:
+
+```ts
+// ✅ corretto — il DB è un confine di fiducia diverso dal client
+const users = db.prepare('SELECT * FROM users').all() as z.infer<typeof UserSchema>[]
+
+// ❌ inutilmente costoso
+const users = db.prepare('SELECT * FROM users').all().map(row => UserSchema.parse(row))
+```
+
+Tre ragioni per preferire il cast:
+
+1. **Il DB è sotto il tuo controllo** — i dati che escono dal DB sono già stati validati quando sono entrati (tramite lo schema del body della POST/PUT). Il confine di fiducia è il client, non il DB.
+
+2. **Il response schema è la rete di sicurezza** — se il DB restituisce un campo inatteso (`passwordHash`, `internalRole`), lo schema `response` lo filtra prima che arrivi al client.
+
+3. **`parse()` ha un costo runtime reale** — eseguire validazione Zod su ogni riga di ogni query, per ogni request, senza benefici pratici se lo schema `response` è già definito, è spreco.
+
+> Questo pattern (`as z.infer<typeof Schema>`) è quello usato implicitamente in tutte le fonti — skill, docs ufficiali Fastify, `fastify/demo`. Nessuno raccomanda `parse()` sui risultati del DB.
 
 ### Reply serializer custom (per XML, CSV, ecc.)
 

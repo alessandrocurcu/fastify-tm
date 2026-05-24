@@ -1,5 +1,57 @@
 # @fastify/sensible
 
+> Già in `dependencies` del template. Da registrare in `index.ts` prima delle route:
+> ```ts
+> import sensible from '@fastify/sensible'
+> await app.register(sensible)
+> ```
+
+Aggiunge utility che tutti usano ma che Fastify core non include per restare minimale.
+
+**`fastify.httpErrors` — costruttori per ogni errore HTTP**
+
+Invece di creare errori a mano:
+```ts
+// ❌ verboso
+const err = new Error('Not found'); err.statusCode = 404; throw err
+
+// ✅
+throw fastify.httpErrors.notFound('risorsa non trovata')
+throw fastify.httpErrors.unauthorized('token mancante')
+throw fastify.httpErrors.conflict('username già in uso')
+```
+
+**`reply.[httpError]` — stessa cosa direttamente sulla reply**
+
+```ts
+reply.notFound()
+reply.forbidden('non hai i permessi')
+```
+
+**`fastify.assert` — guard inline senza try/catch**
+
+```ts
+fastify.assert(request.headers.authorization, 401, 'Token mancante')
+fastify.assert.equal(user.role, 'admin', 403, 'Solo admin')
+```
+
+**`fastify.to` — async error handling senza try/catch**
+
+```ts
+const [err, user] = await fastify.to(db.findUser(id))
+if (err) throw fastify.httpErrors.internalServerError()
+```
+
+**Helper cache control su `reply`**
+
+```ts
+reply.cacheControl('max-age', '1d')  // max-age=86400
+reply.preventCache()                  // no-store, max-age=0, private
+reply.staticCache(86400)             // public, max-age=86400, immutable
+```
+
+---
+
 [![CI](https://github.com/fastify/fastify-sensible/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/fastify/fastify-sensible/actions/workflows/ci.yml)
 [![NPM version](https://img.shields.io/npm/v/@fastify/sensible.svg?style=flat)](https://www.npmjs.com/package/@fastify/sensible)
 [![neostandard javascript style](https://img.shields.io/badge/code_style-neostandard-brightgreen?style=flat)](https://github.com/neostandard/neostandard)
