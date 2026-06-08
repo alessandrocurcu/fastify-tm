@@ -14,3 +14,4 @@ temp
 pnpm-debug.log*
 .vite/
 *.tsbuildinfo
+*.db
