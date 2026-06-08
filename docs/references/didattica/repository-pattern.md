@@ -232,12 +232,3 @@ La regola in breve:
 > Logica con nome nel dominio → use-case + unit test con repository mock
 
 ---
-
-## Differenza da NestJS
-
-| | NestJS | Fastify |
-|---|---|---|
-| Meccanismo di iniezione | DI container + `@Injectable()` | plugin + `fastify.decorate()` |
-| Scope | class instance | oggetto decorato sull'istanza Fastify |
-| Interfaccia esplicita | ✅ (TypeScript interface + token) | via module augmentation (`declare module 'fastify'`) |
-| Testabilità | mock del provider | override del decorator |
