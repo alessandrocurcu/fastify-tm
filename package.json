@@ -5,6 +5,9 @@
   "packageManager": "pnpm@10.33.0",
   "author": "Alessandro Curcu <aleqrq@gmail.com>",
   "license": "ISC",
+  "engines": {
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
+  },
   "keywords": [
     "fastify",
     "typescript",
@@ -12,6 +15,7 @@
     "nodejs"
   ],
   "scripts": {
+    "dev": "node --watch src/index.ts",
     "start": "node src/index.ts",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
