@@ -16,6 +16,10 @@
 - **Avoid overly long names**: aim for a balance between clarity and conciseness
 
 ## General Rules
+- Trasforma questo sotto in una skill che lanci per verificare che è scritto giusto da un subagent
+
+---
+
 - Always use ES modules syntax, not CommonJS.
 - Prefer `interface extends` over `type` with `&` (intersection) for extending types where appropriate.
 - Prefer the `readonly T[]` syntax over `ReadonlyArray<T>` for readonly arrays.
