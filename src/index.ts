@@ -8,16 +8,6 @@ import 'varlock/auto-load';
 const app = Fastify({
   logger: {
     level: ENV.LOG_LEVEL,
-    serializers: {
-      req(request) {
-        return {
-          method: request.method,
-          url: request.url,
-          remoteAddress: request.ip,
-          remotePort: request.socket.remotePort,
-        };
-      },
-    },
   },
 });
 
