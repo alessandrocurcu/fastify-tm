@@ -20,6 +20,7 @@ const app = Fastify({
         }
       : undefined,
   },
+  requestIdHeader: 'Rndr-Id',
 });
 
 app.setValidatorCompiler(validatorCompiler);
