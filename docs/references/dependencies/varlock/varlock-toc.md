@@ -19,6 +19,14 @@ Reference documentation for [Varlock](https://varlock.dev), the schema-driven en
 
 - [JavaScript / Node.js](./JavaScript-Node.js.md) — integrating Varlock into a Node.js application
 
+## Reference
+- [CLI Commands](./cli-commands.md) — command-line interface for managing environment variables and secrets
+- [Root Decorators](./root-decorators.md) — decorators globali nel header del file (es. `@defaultRequired`, `@generateTypes`, `@currentEnv`)
+- [Item Decorators](./item-decorators.md) — decoratori per singola variabile (es. `@required`, `@sensitive`, `@type`)
+- [Data Types](./data-types.md) — tipi disponibili per `@type`: `string`, `number`, `boolean`, `enum`, `url`, `port`, `duration` e altri
+- [Resolver Functions](./resolver-functions.md) — funzioni per valori dinamici (es. `exec()`, `ref()`, `forEnv()`, `fallback()`)
+- [Built in variables](./built-in-variables.md) — variabili built-in iniettate automaticamente da Varlock
+
 ## Wrapping Up
 
 - [Next Steps](./Wrapping-up.md) — improving DX and security posture after the initial migration
