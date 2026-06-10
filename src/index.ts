@@ -1,3 +1,4 @@
+import rateLimit from '@fastify/rate-limit';
 import sensible from '@fastify/sensible';
 import { serializerCompiler, validatorCompiler } from '@fastify/type-provider-zod';
 import Fastify from 'fastify';
@@ -21,12 +22,23 @@ const app = Fastify({
       : undefined,
   },
   requestIdHeader: 'Rndr-Id',
+  trustProxy: true,
+});
+
+await app.register(rateLimit, {
+  max: ENV.RATE_LIMIT_MAX,
+  timeWindow: '1 minute',
 });
 
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 
 await app.register(sensible);
+
+app.setNotFoundHandler(
+  { preHandler: app.rateLimit() },
+  (_request, reply) => reply.notFound(),
+);
 await app.register(usersRoutes);
 
 app.get('/health', async () => {

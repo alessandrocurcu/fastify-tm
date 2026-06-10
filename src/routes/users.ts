@@ -14,13 +14,13 @@ const userSchema = z.object({
 });
 
 const usersRoutes: FastifyPluginAsyncZod = async (fastify) => {
-  fastify.get(
-    '/users',
-    { schema: { response: { 200: z.array(userSchema) } } },
-    async function listUsers() {
-      // return fastify.db.prepare('SELECT * FROM users').all() as z.infer<typeof userSchema>[];
-    },
-  );
+  // fastify.get(
+  //   '/users',
+  //   { schema: { response: { 200: z.array(userSchema) } } },
+  //   async function listUsers() {
+  //     // return fastify.db.prepare('SELECT * FROM users').all() as z.infer<typeof userSchema>[];
+  //   },
+  // );
 
   fastify.get(
     '/users/:id',
@@ -30,7 +30,7 @@ const usersRoutes: FastifyPluginAsyncZod = async (fastify) => {
         response: { 200: userSchema },
       },
     },
-    async function getUser(request, reply) {
+    async function getUser(_request, reply) {
       const user: z.infer<typeof userSchema> = {
         id: 2,
         email: 'Ale',
@@ -41,7 +41,7 @@ const usersRoutes: FastifyPluginAsyncZod = async (fastify) => {
       //   .get(request.params.id) as z.infer<typeof userSchema> | undefined;
 
       if (!user) {
-        return reply.notFound(`User ${request.params.id} not found`);
+        return reply.notFound(`User not found`);
       }
 
       return user;
