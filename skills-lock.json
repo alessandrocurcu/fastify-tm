@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "documentation-and-adrs": {
+      "source": "alessandrocurcu/skills",
+      "sourceType": "github",
+      "skillPath": "skills/documentation-and-adrs/SKILL.md",
+      "computedHash": "98e2c73610865159fe130c8f9b14e4a5aece3952770d1b69752ccaf2e50cc3c1"
+    }
+  }
+}

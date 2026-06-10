@@ -5,15 +5,15 @@
   "packageManager": "pnpm@10.33.0",
   "author": "Alessandro Curcu <aleqrq@gmail.com>",
   "license": "ISC",
-  "engines": {
-    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
-  },
   "keywords": [
     "fastify",
     "typescript",
     "template",
     "nodejs"
   ],
+  "engines": {
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
+  },
   "scripts": {
     "dev": "node --watch src/index.ts",
     "start": "node src/index.ts",
@@ -27,6 +27,7 @@
     "close-with-grace": "^2.5.0",
     "fastify": "^5.8.5",
     "fastify-plugin": "^5.1.0",
+    "varlock": "^1.5.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {

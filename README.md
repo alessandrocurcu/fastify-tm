@@ -63,7 +63,8 @@ erasableSyntaxOnly: true va aggiunto atsconfig.json. Questo template usa usa Nod
 
 ```bash
 pnpm start       # avvia src/index.ts
+pnpm dev         # avvia src/index.ts in watch mode
 pnpm test        # vitest
 pnpm lint        # eslint
-pnpm lint:fix    # eslint --fix
+pnpm lint:fix     # eslint --fix
 ```

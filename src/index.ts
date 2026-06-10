@@ -1,11 +1,13 @@
 import sensible from '@fastify/sensible';
 import { serializerCompiler, validatorCompiler } from '@fastify/type-provider-zod';
 import Fastify from 'fastify';
+import { ENV } from 'varlock/env';
 import usersRoutes from './routes/users.ts';
+import 'varlock/auto-load';
 
 const app = Fastify({
   logger: {
-    level: 'debug',
+    level: ENV.LOG_LEVEL,
     serializers: {
       req(request) {
         return {
