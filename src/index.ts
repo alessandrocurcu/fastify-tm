@@ -8,6 +8,17 @@ import 'varlock/auto-load';
 const app = Fastify({
   logger: {
     level: ENV.LOG_LEVEL,
+    transport: process.stdout.isTTY // attiva pretty solo nel terminale interattivo, in produzione (o pipe CI) rimane ndjson strutturato
+      ? {
+          target: 'pino-pretty',
+          options: {
+            translateTime: 'SYS:HH:MM:ss.l',
+            ignore: 'pid,hostname',
+            colorize: true,
+            singleLine: true,
+          },
+        }
+      : undefined,
   },
 });
 
