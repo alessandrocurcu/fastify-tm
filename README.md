@@ -1,6 +1,6 @@
 # fastify-template
 
-Template e ambiente di apprendimento per costruire server HTTP con [Fastify](https://fastify.dev) e TypeScript.
+Template per costruire server HTTP con [Fastify](https://fastify.dev) e TypeScript.
 
 ## Cosa contiene
 
