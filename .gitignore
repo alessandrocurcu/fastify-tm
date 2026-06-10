@@ -11,6 +11,8 @@ node_modules
 temp
 .env
 .env.local
+.env.*.local
+env.d.ts
 pnpm-debug.log*
 .vite/
 *.tsbuildinfo
