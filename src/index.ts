@@ -35,6 +35,13 @@ app.setSerializerCompiler(serializerCompiler);
 
 await app.register(sensible);
 
+app.addHook('onRequest', async (request) => {
+  const cfRay = request.headers['cf-ray'];
+  if (cfRay) {
+    request.log = request.log.child({ cfRay });
+  }
+});
+
 app.setNotFoundHandler(
   { preHandler: app.rateLimit() },
   (_request, reply) => reply.notFound(),
