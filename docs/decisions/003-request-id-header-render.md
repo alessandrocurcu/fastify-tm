@@ -20,11 +20,27 @@ requestIdHeader: 'Rndr-Id'
 
 Fastify legge il valore dell'header `Rndr-Id` dalla request in ingresso e lo usa come `req.id`. Tutti i log pino emessi durante quella richiesta porteranno `reqId` uguale al `requestID` nei log di Render.
 
+## Header aggiuntivo: CF-Ray
+
+Render forwarda anche l'header `CF-Ray` di Cloudflare su ogni richiesta pubblica. Viene bindato al child logger di pino in un hook `onRequest`:
+
+```ts
+app.addHook('onRequest', async (request) => {
+  const cfRay = request.headers['cf-ray'];
+  if (cfRay) {
+    request.log = request.log.child({ cfRay });
+  }
+});
+```
+
+Questo aggiunge `cfRay` a tutti i log di quella request, permettendo di correlare i log applicativi con i report Cloudflare durante un attacco o un'anomalia. In sviluppo locale l'header non è presente e il guard `if (cfRay)` evita log spurii.
+
 ## Consequences
 
 **Positivo:**
-- Un singolo ID (`Rndr-Id`) correla log applicativi pino e HTTP request logs di Render
-- In sviluppo locale, dove Render non è presente, Fastify ricade sul proprio ID sequenziale (fallback automatico)
+- `Rndr-Id` correla log applicativi pino e HTTP request logs di Render
+- `CF-Ray` correla i log applicativi con i report Cloudflare — utile per diagnosticare attacchi L7
+- In sviluppo locale entrambi i meccanismi fallback gracefully: ID sequenziali, nessun `cfRay`
 - Nessuna dipendenza aggiuntiva
 
 **Trade-off:**

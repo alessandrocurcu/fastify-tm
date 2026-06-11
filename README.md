@@ -1,6 +1,6 @@
 # fastify-template
 
-Template per costruire server HTTP con [Fastify](https://fastify.dev) e TypeScript.
+Template per costruire server HTTP con [Fastify](https://fastify.dev) e TypeScript. Pensato per essere rilasciato su Render.com 
 
 ## Cosa contiene
 

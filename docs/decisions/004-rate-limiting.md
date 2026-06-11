@@ -29,15 +29,24 @@ Il 404 handler ha il proprio `preHandler: app.rateLimit()` perché senza di esso
 **4. `RATE_LIMIT_MAX` come env var**
 Il valore è esternalizzato in `RATE_LIMIT_MAX` per poter essere regolato per ambiente (es. più restrittivo in produzione, più permissivo in staging) senza modificare il codice.
 
+## Contesto: protezione DDoS di Render
+
+Tutto il traffico verso i web service di Render passa attraverso Cloudflare prima di raggiungere l'app. Questo copre automaticamente, senza configurazione:
+
+- **L3/L4** (SYN flood, UDP flood, ICMP flood) — bloccati a livello di rete da Cloudflare
+- **L7 volumetrico** (HTTP flood ovvio) — filtrato con euristiche da Cloudflare
+
+**Non coperto da Cloudflare:** attacchi L7 "intelligenti" che sembrano traffico legittimo — credential stuffing, brute-force su endpoint specifici, API abuse, enumerazione di URL. Per questi serve il rate limiting applicativo.
+
 ## Alternatives Considered
 
 ### Nessun rate limiting
-- Rifiutato: superficie di attacco non accettabile per un'app pubblica
+- Rifiutato: Cloudflare non copre gli attacchi L7 mirati — la superficie applicativa rimane esposta
 
-### Rate limiting a livello infrastrutturale (Render / CDN)
-- Render non offre rate limiting applicativo nativo sul piano base
-- Un CDN (Cloudflare) potrebbe farlo, ma aggiungerebbe una dipendenza esterna non necessaria per questo template
-- Rifiutato: meglio averlo nel codice, portabile su qualsiasi piattaforma
+### Rate limiting solo a livello Cloudflare
+- Render non offre rate limiting L7 applicativo nativo
+- Cloudflare lo offre (WAF), ma richiede un piano a pagamento e configurazione esterna al codice
+- Rifiutato: meglio averlo nel codice, portabile su qualsiasi piattaforma e zero dipendenze esterne
 
 ## Consequences
 
