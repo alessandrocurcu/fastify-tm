@@ -17,3 +17,4 @@ pnpm-debug.log*
 .vite/
 *.tsbuildinfo
 *.db
+note_private.md
