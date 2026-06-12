@@ -2,6 +2,22 @@
 
 Un plugin che raccoglie utility che tutti finiscono per riscrivere nelle proprie app, ma che Fastify core non include per rimanere minimale. Il nome è ispirato a `vim-sensible` — configurazioni che "chiunque può concordare siano ragionevoli".
 
+## In breve
+Tutto ruota attorno al ciclo request/response:
+- errori HTTP → modificano la response
+- assert → validano la request (o lo stato) prima di rispondere
+- to → gestisce errori in operazioni async che portano a una response
+- cache control → header della response
+- req.forwarded(), req.is() → ispezione della request
+
+Nello specifico
+1. Errori HTTP — httpErrors.*, reply.notFound(), ecc. (la parte più usata)
+2. Guard inline — fastify.assert() per validazioni senza try/catch
+3. Async error handling — fastify.to(), il pattern Go [err, result]
+4. Cache control — reply.preventCache(), reply.staticCache(), reply.cacheControl()
+5. Request utilities — req.forwarded(), req.is() per content-type detection
+6. Schema condiviso — sharedSchemaId per documentare errori in Swagger
+
 ## Installazione e registrazione
 
 ```bash
@@ -126,8 +142,16 @@ fastify.post('/api/v1/recipes', async (request) => {
 ---
 
 ## 4. `to` — async error handling senza try/catch
+In Go, le funzioni restituiscono due valori: il risultato e l'errore. Non esiste try/catch:
 
-Ispirato al pattern Go: restituisce `[errore, risultato]` invece di lanciare eccezioni.
+```go
+user, err := db.FindUser(id)
+if err != nil {
+    // gestisci errore
+}
+```
+
+fastify.to() porta questo pattern in JavaScript: restituisce `[errore, risultato]` invece di lanciare eccezioni.
 Utile quando hai molte operazioni async in sequenza:
 
 ```typescript
