@@ -1,3 +1,4 @@
+import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import sensible from '@fastify/sensible';
 import { serializerCompiler, validatorCompiler } from '@fastify/type-provider-zod';
@@ -33,6 +34,9 @@ await app.register(rateLimit, {
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 
+await app.register(helmet, {
+  contentSecurityPolicy: false,
+});
 await app.register(sensible);
 
 app.addHook('onRequest', async (request) => {
