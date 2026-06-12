@@ -54,7 +54,7 @@ export async function buildApp() {
 
   await app.register(usersRoutes);
 
-  app.get('/health', async () => {
+  app.get('/health', { config: { rateLimit: false } }, async () => {
     return { status: 'ok' };
   });
 
