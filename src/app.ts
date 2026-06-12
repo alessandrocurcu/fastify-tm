@@ -10,6 +10,7 @@ export async function buildApp() {
   const app = Fastify({
     logger: {
       level: ENV.LOG_LEVEL,
+      redact: ['req.headers.authorization', 'req.headers.cookie', '*.password', '*.secret', '*.token'],
       transport: process.stdout.isTTY
         ? {
             target: 'pino-pretty',
