@@ -1,3 +1,4 @@
+import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import sensible from '@fastify/sensible';
@@ -23,8 +24,18 @@ export async function buildApp() {
           }
         : undefined,
     },
+    bodyLimit: 1_048_576, // 1 MiB — default, ma meglio esplicitarlo
     requestIdHeader: 'Rndr-Id',
     trustProxy: true,
+  });
+
+  await app.register(cors, {
+    origin: ENV.CORS_ORIGIN?.split(',') ?? false,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    maxAge: 86400,
+    logLevel: 'silent',
   });
 
   await app.register(rateLimit, {
