@@ -25,6 +25,9 @@ export async function buildApp() {
         : undefined,
     },
     bodyLimit: 1_048_576, // 1 MiB — default, ma meglio esplicitarlo
+    // Render/Cloudflare: keepAlive del proxy arriva a 900s, Node default è 5s → 502 intermittenti
+    keepAliveTimeout: 120_000,
+    http: { headersTimeout: 121_000 },
     requestIdHeader: 'Rndr-Id',
     trustProxy: true,
   });
