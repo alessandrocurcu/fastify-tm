@@ -2,6 +2,7 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import sensible from '@fastify/sensible';
 import { serializerCompiler, validatorCompiler } from '@fastify/type-provider-zod';
+import closeWithGrace from 'close-with-grace';
 import Fastify from 'fastify';
 import { ENV } from 'varlock/env';
 import usersRoutes from './routes/users.ts';
@@ -54,6 +55,16 @@ await app.register(usersRoutes);
 
 app.get('/health', async () => {
   return { status: 'ok' };
+});
+
+closeWithGrace(async ({ signal, err }) => {
+  if (err) {
+    app.log.error({ err }, 'server closing with error');
+  }
+  else {
+    app.log.info(`${signal} received, server closing`);
+  }
+  await app.close();
 });
 
 await app.listen({ port: ENV.PORT, host: '0.0.0.0' });
