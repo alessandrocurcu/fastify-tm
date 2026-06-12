@@ -4,19 +4,6 @@ Template per costruire server HTTP con [Fastify](https://fastify.dev) e TypeScri
 
 ## Cosa contiene
 
-### `docs/demo/` — Progetto di riferimento ufficiale
-
-Copia del [fastify/demo](https://github.com/fastify/demo) — il progetto d'esempio mantenuto dai core maintainers di Fastify. È un'API REST per la gestione di task con:
-
-- autenticazione con cookie e `@fastify/jwt`
-- upload di file e download CSV
-- ruoli e permessi (RBAC)
-- MySQL con migrations e seed
-- test end-to-end con `fastify.inject()`
-- Swagger UI su `/api/docs`
-
-Usalo come riferimento concreto di architettura e best practices Fastify in produzione.
-
 ### `docs/references/` — Documentazione offline
 
 Copia locale della documentazione ufficiale Fastify (Reference + Guides), con link interni risolti in markdown.
@@ -28,6 +15,10 @@ Copia locale della documentazione ufficiale Fastify (Reference + Guides), con li
 Note aggiornate tratte da *Accelerating Server-Side Development with Fastify* (2023). Il libro usa Fastify v3/v4, Node 18 e CommonJS — ogni capitolo è stato riscritto per Fastify v5, Node ≥ 24, ESM e TypeScript con type stripping.
 
 → Punto d'ingresso: [`docs/references/book/README.md`](docs/references/book/README.md)
+
+### `docs/references/dependencies` — Documentazione offline di alcune dipendenze
+
+Copia locale delle documentazioni ufficiali di alcune dipendenze
 
 ### `.agents/skills/fastify-best-practices/` — AI skill
 

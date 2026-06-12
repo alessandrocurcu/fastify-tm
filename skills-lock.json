@@ -6,6 +6,12 @@
       "sourceType": "github",
       "skillPath": "skills/documentation-and-adrs/SKILL.md",
       "computedHash": "98e2c73610865159fe130c8f9b14e4a5aece3952770d1b69752ccaf2e50cc3c1"
+    },
+    "fastify-best-practices": {
+      "source": "alessandrocurcu/skills",
+      "sourceType": "github",
+      "skillPath": "skills/fastify/SKILL.md",
+      "computedHash": "16f1dcf1cadcbcf37298b8f249148776eca682acc3bfed78f5a28b811e386063"
     }
   }
 }
