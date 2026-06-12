@@ -15,4 +15,11 @@ closeWithGrace(async ({ signal, err }) => {
   await app.close();
 });
 
-await app.listen({ port: ENV.PORT, host: '0.0.0.0' });
+try {
+  await app.listen({ port: ENV.PORT, host: '0.0.0.0' });
+}
+catch (err) {
+  app.log.error(err);
+  process.exit(1);
+  // Se listen() fallisce (porta occupata, permessi insufficienti, qualsiasi errore di avvio) ora il processo logga l'errore via Pino e termina con exit code 1 — segnale esplicito a Render che il deploy è fallito.
+}
