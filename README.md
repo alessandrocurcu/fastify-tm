@@ -1,6 +1,18 @@
 # fastify-template
 
-Template per costruire server HTTP con [Fastify](https://fastify.dev) e TypeScript. Pensato per essere rilasciato su Render.com 
+Template per costruire server HTTP con [Fastify](https://fastify.dev) e TypeScript. Pensato per essere rilasciato su Render.com con PostgreSQL.
+
+
+## Schema di un prototipo tipo
+```txt
+Internet
+   ↓
+Render Load Balancer  ← SSL termination, HTTP→HTTPS redirect
+   ↓ (HTTP interno)
+Fastify               ← rate limiting, auth, versioning, routing
+   ↓
+PostgreSQL
+```
 
 ## Cosa contiene
 
