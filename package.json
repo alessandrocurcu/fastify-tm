@@ -28,7 +28,7 @@
     "@fastify/sensible": "^6.0.4",
     "@fastify/type-provider-zod": "^1.0.0",
     "close-with-grace": "^2.5.0",
-    "fastify": "^5.8.5",
+    "fastify": "^5.9.0",
     "fastify-plugin": "^5.1.0",
     "varlock": "^1.5.1",
     "zod": "^4.4.3"
