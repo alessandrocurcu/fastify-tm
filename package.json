@@ -24,7 +24,7 @@
   "dependencies": {
     "@fastify/cors": "^11.2.0",
     "@fastify/helmet": "^13.0.2",
-    "@fastify/rate-limit": "^11.0.0",
+    "@fastify/rate-limit": "^11.1.0",
     "@fastify/sensible": "^6.0.4",
     "@fastify/type-provider-zod": "^1.0.0",
     "close-with-grace": "^2.5.0",
