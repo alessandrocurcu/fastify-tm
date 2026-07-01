@@ -30,7 +30,7 @@
     "close-with-grace": "^2.5.0",
     "fastify": "^5.8.5",
     "fastify-plugin": "^5.1.0",
-    "varlock": "^1.5.1",
+    "varlock": "^1.9.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
